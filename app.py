@@ -1,4 +1,5 @@
 import gradio as gr
+from llmsherpa.readers import LayoutPDFReader
 
 from deepdoc.parser.pdf_parser import RAGFlowPdfParser
 
@@ -7,6 +8,16 @@ pdf_parser = RAGFlowPdfParser()
 
 
 def parse_pdf(file):
+    llmsherpa_api_url = "http://localhost:5010/api/parseDocument?renderFormat=all&applyOcr=yes"
+    # pdf_url = "https://arxiv.org/pdf/1910.13461.pdf"  # also allowed is a file path e.g. /home/downloads/xyz.pdf
+    pdf_reader = LayoutPDFReader(llmsherpa_api_url)
+    doc = pdf_reader.read_pdf(file.name)
+    print(f"{doc.chunks()=}")
+
+    return "\n".join(str(chunk.to_context_text()) for chunk in doc.chunks())
+
+
+def parse_pdf_old(file):
     # Call the parser to get the text and tables
     text, tables = pdf_parser(file.name, need_image=False, zoomin=3, return_html=False)
     print(f"{text=}")
